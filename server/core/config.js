@@ -23,5 +23,14 @@ module.exports = {
         }
 
         APPS.config = appconfig
+
+    },
+
+    async loadDb(){
+        let loadDb = APPS.models.settings.getSettings();
+        APPS.logger.info(JSON.stringify(loadDb))
+        if(!loadDb) {
+            APPS.config.setup = true;
+        }
     }
 }

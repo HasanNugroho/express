@@ -8,8 +8,8 @@ module.exports = {
         APPS.models = require('./db').init()
 
         try {
-            await APPS.models.onReady
-            // await APPS.configSvc.loadFromDb()
+            await APPS.models.onReady()
+            await APPS.configSvc.loadDb()
             // await APPS.configSvc.applyFlags()
         } catch (err) {
             APPS.logger.error('Database Initialization Error: ' + err.message)
@@ -18,7 +18,16 @@ module.exports = {
             }
             process.exit(1)
         }
-        let needSetup = APPS.models
-        APPS.logger.info(JSON.stringify(needSetup))
+        
+        this.bootMaster();
+        
+    },
+
+    async bootMaster(){
+        try {
+            
+        } catch (error) {
+            throw error;
+        }
     }
 }

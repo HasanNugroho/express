@@ -5,9 +5,11 @@ const autoload = require('auto-load')
 const path = require('path')
 const Promise = require('bluebird')
 
+const migrationSource = require('../db/migrator-source')
 module.exports = {
     Objection,
     kenx: null,
+    conAttempts: 0,
 
     init() {
         let self = this
@@ -43,62 +45,49 @@ module.exports = {
 
         const models = autoload(path.join(APPS.SERVERPATH, 'models'))
 
-        // Set init tasks
-        let conAttempts = 0
-        let initTasks = {
-            // -> Attempt initial connection
-            async connect() {
-                try {
-                    APPS.logger.info('Connecting to database...')
-                    await self.knex.raw('SELECT 1 + 1;')
-                    APPS.logger.info('Database Connection Successful [ OK ]')
-                } catch (err) {
-                    if (conAttempts < 5) {
-                        if (err.code) {
-                            APPS.logger.error(`Database Connection Error: ${err.code} ${err.address}:${err.port}`)
-                        } else {
-                            APPS.logger.error(`Database Connection Error: ${err.message}`)
-                        }
-                        APPS.logger.warn(`Will retry in 3 seconds... [Attempt ${++conAttempts} of 5]`)
-                        await new Promise(resolve => setTimeout(resolve, 3000))
-                        await initTasks.connect()
-                    } else {
-                        throw err
-                    }
-                }
-            },
-
-            // -> Migrate DB Schemas
-            async syncSchemas() {
-                return self.knex.migrate.latest({
-                    tableName: 'migrations',
-                    migrationSource
-                })
-            },
-
-            // -> Migrate DB Schemas from beta
-            async migrateFromBeta() {
-                return migrateFromBeta.migrate(self.knex)
-            }
-        }
-
-        // Perform init tasks
-        let initTasksQueue = (APPS.IS_MASTER) ? [
-            initTasks.connect(),
-            // initTasks.migrateFromBeta,
-            // initTasks.syncSchemas
-          ] : [
-            () => { return Promise.resolve() }
-          ]
-      
-
-        // initTasks.connect()
-        APPS.logger.info(`Using database driver ${dbClient} for ${APPS.config.db.type} [ OK ]`)
-        this.onReady = Promise.each(initTasksQueue, t => t()).return(true)
-
         return {
             ...this,
             ...models
         }
+    },
+
+    async onReady() {
+        try {
+            this.connect()
+            this.syncSchemas()
+        } catch (err) {
+            throw err
+        }
+    },
+
+    async connect() {
+        
+        try {
+            APPS.logger.info('Connecting to database...')
+            await this.knex.raw('SELECT 1 + 1;')
+            APPS.logger.info('Database Connection Successful [ OK ]')
+        } catch (err) {
+            APPS.logger.error(JSON.stringify(err))
+            if (this.conAttempts < 5) {
+                if (err.code) {
+                    APPS.logger.error(`Database Connection Error: ${err.code} ${err.address}:${err.port}`)
+                } else {
+                    APPS.logger.error(`Database Connection Error: ${err.message}`)
+                }
+                APPS.logger.warn(`Will retry in 3 seconds... [Attempt ${++this.conAttempts} of 5]`)
+                await new Promise(resolve => setTimeout(resolve, 3000))
+                await this.connect()
+            } else {
+                throw err
+            }
+        }
+    },
+
+    // -> Migrate DB Schemas
+    async syncSchemas() {
+        return this.knex.migrate.latest({
+            tableName: 'migrations',
+            migrationSource
+        })
     }
 }

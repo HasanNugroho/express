@@ -4,6 +4,13 @@
  */
 exports.up = function(knex) {
     return knex.schema
+
+    .createTable('settings', table => {
+        table.string('key').notNullable().primary()
+        table.json('value')
+        table.string('updatedAt').notNullable()
+    })
+
     // create table users
     .createTable('users', function (table) {
         table.uuid('id').primary();

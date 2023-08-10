@@ -7,7 +7,7 @@ db:
   port: 3306
   user: farm
   pass: farm
-  db: farm
+  db: farm_express
   ssl: false
 pool:
   min: 1
