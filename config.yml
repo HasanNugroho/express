@@ -1,0 +1,15 @@
+# port apps
+port: 5895
+
+# Database
+db: 
+  host: localhost
+  port: 3306
+  user: farm
+  pass: farm
+  db: farm
+  ssl: false
+pool:
+  min: 1
+logFormat: default
+logLevel: info
