@@ -3,7 +3,7 @@
 /**
  * @type { Object.<string, import("knex").Knex.Config> }
  */
-const logger = require('../helper/logging.js');
+const logger = require('../core/logger');
 
 module.exports = {
 

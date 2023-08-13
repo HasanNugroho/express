@@ -8,7 +8,8 @@ module.exports = {
         APPS.models = require('./db').init()
 
         try {
-            await APPS.models.onReady()
+            await APPS.models.connect()
+            await APPS.models.syncSchemas()
             await APPS.configSvc.loadDb()
             // await APPS.configSvc.applyFlags()
         } catch (err) {
@@ -25,7 +26,13 @@ module.exports = {
 
     async bootMaster(){
         try {
-            
+            if (APPS.config.setup) {
+                APPS.logger.info('Starting setup wizard...')
+                require('../setup')()
+            } else {
+                APPS.servers = require('./server')
+                require('../master')()
+            }
         } catch (error) {
             throw error;
         }

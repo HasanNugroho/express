@@ -51,17 +51,7 @@ module.exports = {
         }
     },
 
-    async onReady() {
-        try {
-            this.connect()
-            this.syncSchemas()
-        } catch (err) {
-            throw err
-        }
-    },
-
     async connect() {
-        
         try {
             APPS.logger.info('Connecting to database...')
             await this.knex.raw('SELECT 1 + 1;')

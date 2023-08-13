@@ -45,8 +45,6 @@ class Settings extends Model {
 
     static async getSettings() {
         const settings = APPS.models.settings.query();
-        APPS.logger.info(JSON.stringify(settings))
-
         if (settings.length > 0) {
             return _.reduce(settings, (res, val, key) => {
                 _.set(res, val.key, (_.has(val.value, 'v')) ? val.value.v : val.value)

@@ -34,6 +34,16 @@ exports.up = function(knex) {
 
     .alterTable('groups', table => {
         table.uuid('user_id').references('id').inTable('users');
+    })
+
+    .createTable('apiKeys', table => {
+        table.increments('id').primary()
+        table.string('name').notNullable()
+        table.text('key').notNullable()
+        table.string('expiration').notNullable()
+        table.boolean('isRevoked').notNullable().defaultTo(false)
+        table.string('createdAt').notNullable()
+        table.string('updatedAt').notNullable()
     });
 };
 

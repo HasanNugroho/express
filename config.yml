@@ -1,5 +1,5 @@
 # port apps
-port: 5895
+port: 2000
 
 # Database
 db: 
@@ -13,3 +13,15 @@ pool:
   min: 1
 logFormat: default
 logLevel: info
+
+# server
+ssl:
+  enabled: false
+  port: 2443
+  provider: custom
+
+  format: pem
+  key: path/to/key.pem
+  cert: path/to/cert.pem
+
+bindIP: 0.0.0.0
